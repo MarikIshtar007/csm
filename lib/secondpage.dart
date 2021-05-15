@@ -51,6 +51,20 @@ class _SecondPageState extends State<SecondPage> {
     });
   }
 
+  void updateMinMax(String min, String max) async {
+    var uri = Uri.parse(
+        "https://node-red-gueqk-2021-05-08.eu-gb.mybluemix.net/command?command=update-$min-$max");
+    var res = await http.get(uri);
+    print(res.statusCode);
+  }
+
+  bool isNumeric(String s) {
+    if (s == null) {
+      return false;
+    }
+    return double.tryParse(s) != null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -188,7 +202,9 @@ class _SecondPageState extends State<SecondPage> {
                                             padding: EdgeInsets.all(15),
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
-                                              color: Color(0xFFE7253A),
+                                              color: auto_mode
+                                                  ? Colors.green[800]
+                                                  : Color(0xFFE7253A),
                                             ),
                                             child: Icon(
                                                 Icons.brightness_auto_outlined,
@@ -273,41 +289,83 @@ class _SecondPageState extends State<SecondPage> {
                                                             horizontal: 40),
                                                     child: Form(
                                                       key: _formKey,
-                                                      child: Column(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          Text(
-                                                            'Temperature Range',
-                                                            style: TextStyle(
-                                                                fontSize: 24),
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10,
-                                                          ),
-                                                          TextFormField(
-                                                            controller:
-                                                                minTextController,
-                                                            decoration:
-                                                                InputDecoration(
-                                                              border:
-                                                                  UnderlineInputBorder(),
-                                                              labelText:
-                                                                  'Min. Temperature',
+                                                      child:
+                                                          SingleChildScrollView(
+                                                        child: Column(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Text(
+                                                              'Temperature Range',
+                                                              style: TextStyle(
+                                                                  fontSize: 24),
                                                             ),
-                                                          ),
-                                                          TextFormField(
-                                                            controller:
-                                                                maxTextController,
-                                                            decoration:
-                                                                InputDecoration(
-                                                              border:
-                                                                  UnderlineInputBorder(),
-                                                              labelText:
-                                                                  'Max.Temperature',
+                                                            SizedBox(
+                                                              height: 10,
                                                             ),
-                                                          ),
-                                                        ],
+                                                            TextFormField(
+                                                              validator:
+                                                                  (value) {
+                                                                if (!isNumeric(
+                                                                    value)) {
+                                                                  return 'Value must be an integer';
+                                                                }
+                                                              },
+                                                              controller:
+                                                                  minTextController,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                border:
+                                                                    UnderlineInputBorder(),
+                                                                labelText:
+                                                                    'Min. Temp. (Current: $min)',
+                                                              ),
+                                                            ),
+                                                            TextFormField(
+                                                              validator:
+                                                                  (value) {
+                                                                if (!isNumeric(
+                                                                    value)) {
+                                                                  return 'Value must be an integer';
+                                                                }
+                                                              },
+                                                              controller:
+                                                                  maxTextController,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                border:
+                                                                    UnderlineInputBorder(),
+                                                                labelText:
+                                                                    'Max. Temp. (Current: $max)',
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: 10,
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed: () {
+                                                                if (_formKey
+                                                                    .currentState
+                                                                    .validate()) {
+                                                                  updateMinMax(
+                                                                      minTextController
+                                                                          .text,
+                                                                      maxTextController
+                                                                          .text);
+                                                                  minTextController
+                                                                      .text = '';
+                                                                  maxTextController
+                                                                      .text = '';
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                }
+                                                              },
+                                                              child: Text(
+                                                                  'Update'),
+                                                            )
+                                                          ],
+                                                        ),
                                                       ),
                                                     ),
                                                   );
